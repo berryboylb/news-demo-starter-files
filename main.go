@@ -24,9 +24,22 @@ type Search struct {
 
 // fetches html file and the template is from "html/template"
 var tpl = template.Must(template.ParseFiles("index.html"))
+var tpl1 = template.Must(template.ParseFiles("notfound.html"))
 
 func indexHandler(w http.ResponseWriter, r *http.Request) {
+	 if r.URL.Path != "/" {
+        errorHandler(w, r, http.StatusNotFound)
+        return
+    }
 	tpl.Execute(w, nil)
+}
+
+func errorHandler(w http.ResponseWriter, r *http.Request, status int) {
+    w.WriteHeader(status)
+    if status == http.StatusNotFound {
+        // fmt.Fprint(w, "custom 404")
+		tpl1.Execute(w, nil)
+    }
 }
 
 func searchHandler(newsapi *news.Client) http.HandlerFunc {
@@ -80,6 +93,7 @@ func searchHandler(newsapi *news.Client) http.HandlerFunc {
 		fmt.Printf("%+v", results)
 	}
 }
+
 
 func (s *Search) IsLastPage() bool {
 	return s.NextPage >= s.TotalPages
